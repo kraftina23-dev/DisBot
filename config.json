@@ -1,0 +1,73 @@
+{
+    "guilds": {
+        "1183728016715698246": {
+            "veteran": {
+                "roleId": "1183728016795373641",
+                "requiredDays": 90,
+                "allowedChannels": [],
+                "bannerUrl": "https://media.discordapp.net/attachments/1521175085585797300/1524413914442367086/file_00000000d280720a89156b9c7e2fb073.png?ex=6a4fa897&is=6a4e5717&hm=953b88b514b40d582f6c4054d233a954e53f53e2aaa545c49c8553fc2f974af3&=&format=webp&quality=lossless&width=1632&height=653"
+            },
+            "welcome": {
+                "channelId": "1183728017365815351"
+            },
+            "help": {
+                "cooldownMs": 300000,
+                "roleIds": [
+                    "1183728016812167202",
+                    "1183728016828940329"
+                ],
+                "allowedChannels": []
+            },
+            "nickname": {
+                "rules": {}
+            },
+            "invites": {
+                "allowedChannels": []
+            },
+            "moderation": {
+                "muteRoleId": "1539529371100905492",
+                "vmuteRoleId": null,
+                "allowedRoles": [],
+                "allowedChannels": [
+                    "1183728017365815351"
+                ]
+            }
+        },
+        "1380456617727754240": {
+            "veteran": {
+                "roleId": "1434610575916138636",
+                "requiredDays": 365,
+                "allowedChannels": [
+                    "1380480158934372442",
+                    "1380830557562212432"
+                ],
+                "bannerUrl": "https://media.discordapp.net/attachments/1521175085585797300/1524413914442367086/file_00000000d280720a89156b9c7e2fb073.png?ex=6a4fa897&is=6a4e5717&hm=953b88b514b40d582f6c4054d233a954e53f53e2aaa545c49c8553fc2f974af3&=&format=webp&quality=lossless&width=1632&height=653"
+            },
+            "welcome": {
+                "channelId": "1434600546840477908"
+            },
+            "help": {
+                "roleIds": [
+                    "1380474000718692433",
+                    "1394968214936490087"
+                ],
+                "cooldownMs": 300000,
+                "allowedChannels": [
+                    "1380456618189262870"
+                ]
+            },
+            "nickname": {
+                "rules": {}
+            },
+            "invites": {
+                "allowedChannels": []
+            },
+            "moderation": {
+                "muteRoleId": null,
+                "vmuteRoleId": null,
+                "allowedRoles": [],
+                "allowedChannels": []
+            }
+        }
+    }
+}

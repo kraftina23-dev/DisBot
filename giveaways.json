@@ -1,0 +1,152 @@
+{
+    "giveaways": {
+        "mrj6jo0kzzpdzu": {
+            "id": "mrj6jo0kzzpdzu",
+            "guildId": "1183728016715698246",
+            "channelId": "1183728017365815351",
+            "messageId": "1526198959008387184",
+            "title": "dsa",
+            "description": null,
+            "color": "5865F2",
+            "bannerUrl": null,
+            "winnersCount": 1,
+            "endTimestamp": 1784549385812,
+            "hostId": "1168551083988222143",
+            "participants": [
+                "1168551083988222143"
+            ],
+            "ended": true,
+            "winners": [
+                "1168551083988222143"
+            ]
+        },
+        "mrj6krqngqlkbk": {
+            "id": "mrj6krqngqlkbk",
+            "guildId": "1183728016715698246",
+            "channelId": "1183728017365815351",
+            "messageId": "1526199174570184818",
+            "title": "dfsw",
+            "description": null,
+            "color": "5865F2",
+            "bannerUrl": null,
+            "winnersCount": 1,
+            "endTimestamp": 1784549437295,
+            "hostId": "1168551083988222143",
+            "participants": [],
+            "ended": true,
+            "winners": []
+        },
+        "1526201684047429773": {
+            "id": "1526201684047429773",
+            "guildId": "1183728016715698246",
+            "channelId": "1183728017365815351",
+            "messageId": "1526201684047429773",
+            "title": "sasd",
+            "description": null,
+            "color": "5865F2",
+            "bannerUrl": null,
+            "winnersCount": 1,
+            "endTimestamp": 1785154835613,
+            "hostId": "1168551083988222143",
+            "participants": [],
+            "ended": true,
+            "winners": []
+        },
+        "1526221736272461966": {
+            "id": "1526221736272461966",
+            "guildId": "1183728016715698246",
+            "channelId": "1183728017365815351",
+            "messageId": "1526221736272461966",
+            "title": "sad",
+            "description": null,
+            "color": "5865F2",
+            "bannerUrl": null,
+            "winnersCount": 1,
+            "endTimestamp": 1784554816385,
+            "hostId": "1168551083988222143",
+            "participants": [],
+            "ended": true,
+            "winners": []
+        },
+        "1526247995559903405": {
+            "id": "1526247995559903405",
+            "guildId": "1183728016715698246",
+            "channelId": "1183728017365815351",
+            "messageId": "1526247995559903405",
+            "title": "רול רולקס",
+            "description": "ביבי",
+            "color": "E67E22",
+            "bannerUrl": "https://cdn.discordapp.com/ephemeral-attachments/1526125047524102164/1526247991533506660/7564-manager.png?ex=6a5654b5&is=6a550335&hm=2dbe67634d8821e041b2d079b54b20480490479f9e95f9ca93a5f5bbed2861c2&",
+            "winnersCount": 1,
+            "endTimestamp": 1783956578152,
+            "hostId": "1168551083988222143",
+            "participants": [
+                "1168551083988222143"
+            ],
+            "ended": true,
+            "winners": [
+                "1168551083988222143"
+            ]
+        },
+        "1526248641365282823": {
+            "id": "1526248641365282823",
+            "guildId": "1183728016715698246",
+            "channelId": "1183728017365815351",
+            "messageId": "1526248641365282823",
+            "title": "dassd",
+            "description": null,
+            "color": "5865F2",
+            "bannerUrl": null,
+            "winnersCount": 1,
+            "endTimestamp": 1784561232202,
+            "hostId": "1168551083988222143",
+            "participants": [
+                "1168551083988222143"
+            ],
+            "ended": true,
+            "winners": [
+                "1168551083988222143"
+            ]
+        },
+        "1526902728603730082": {
+            "id": "1526902728603730082",
+            "guildId": "1183728016715698246",
+            "channelId": "1183728017365815351",
+            "messageId": "1526902728603730082",
+            "title": "sad",
+            "description": null,
+            "color": "5865F2",
+            "bannerUrl": null,
+            "winnersCount": 1,
+            "endTimestamp": 1784112438742,
+            "hostId": "1521150635612049613",
+            "participants": [
+                "1521150635612049613"
+            ],
+            "ended": true,
+            "winners": [
+                "1521150635612049613"
+            ]
+        },
+        "1527256921713938483": {
+            "id": "1527256921713938483",
+            "guildId": "1183728016715698246",
+            "channelId": "1183728017365815351",
+            "messageId": "1527256921713938483",
+            "title": "בדיקה",
+            "description": "בדיק",
+            "color": "5865F2",
+            "bannerUrl": null,
+            "winnersCount": 1,
+            "endTimestamp": 1784196885003,
+            "hostId": "1353616519925465163",
+            "participants": [
+                "1353616519925465163"
+            ],
+            "ended": true,
+            "winners": [
+                "1353616519925465163"
+            ]
+        }
+    }
+}
