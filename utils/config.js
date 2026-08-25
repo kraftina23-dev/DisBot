@@ -31,6 +31,9 @@ const DEFAULT_GUILD_CONFIG = {
         vmuteRoleId: null, // נוצר/מוגדר דרך /setup vmute
         allowedRoles: [], // מי שמחזיק אחד מהרולים האלה יכול להשתמש ב-mute/unmute/vmute/unvmute. ריק = רק Administrator
         allowedChannels: [] // עד 5 חדרים בהם ניתן להשתמש בפקודות המודרציה. ריק = מותר בכל חדר
+    },
+    clear: {
+        allowedRoles: [] // מי שמחזיק אחד מהרולים האלה יכול להשתמש ב-!clear. ריק = רק Administrator
     }
 };
  
@@ -107,4 +110,3 @@ function updateGuildConfig(guildId, updater) {
 }
  
 module.exports = { loadConfig, saveConfig, getGuildConfig, updateGuildConfig };
- 

@@ -19,7 +19,7 @@ const { startMuteScheduler } = require('../utils/muteScheduler');
 const { reapplyForRoleHolders } = require('../utils/nicknameEngine');
  
 // כל ה-customId-ים ששייכים לפאנל (משמש לבדיקת הרשאות)
-const PANEL_PREFIXES = ['panel_', 'veteran_', 'select_', 'modal_', 'help_'];
+const PANEL_PREFIXES = ['panel_', 'veteran_', 'select_', 'modal_', 'help_', 'welcome_'];
  
 module.exports = {
     name: 'interactionCreate',
@@ -126,6 +126,10 @@ async function handleInteraction(interaction) {
             switch (interaction.customId) {
                 case 'panel_back':
                     return interaction.update(buildMainPanelPayload(interaction.guild.id));
+ 
+                case 'welcome_clear_channel':
+                    updateGuildConfig(interaction.guild.id, cfg => { cfg.welcome.channelId = null; });
+                    return interaction.update(buildWelcomePanelPayload(interaction.guild.id));
             }
         }
  
@@ -275,6 +279,27 @@ async function handleInteraction(interaction) {
             }
         }
  
+        // ---------- בחירת פעולה במסך ניקוי ההודעות ----------
+        if (interaction.isStringSelectMenu() && interaction.customId === 'select_clear_action') {
+            const action = interaction.values[0];
+ 
+            if (action === 'set_roles') {
+                const row = new ActionRowBuilder().addComponents(
+                    new RoleSelectMenuBuilder()
+                        .setCustomId('select_clear_roles')
+                        .setPlaceholder('בחר רולים שמורשים ל-!clear')
+                        .setMinValues(1)
+                        .setMaxValues(5)
+                );
+                return interaction.reply({ content: 'בחר את הרולים שרשאים להשתמש ב-`!clear` (אדמינים תמיד רשאים בכל מקרה):', components: [row], ephemeral: true });
+            }
+ 
+            if (action === 'clear_roles_list') {
+                updateGuildConfig(interaction.guild.id, cfg => { cfg.clear.allowedRoles = []; });
+                return interaction.update(buildClearPanelPayload(interaction.guild.id));
+            }
+        }
+ 
         // ---------- בחירת פעולה במסך הוותק ----------
         if (interaction.isStringSelectMenu() && interaction.customId === 'select_veteran_action') {
             const action = interaction.values[0];
@@ -387,6 +412,12 @@ async function handleInteraction(interaction) {
             return interaction.update({ content: `✅ הרולים המורשים לפקודות המודרציה עודכנו: ${roleIds.map(id => `<@&${id}>`).join(', ')}`, components: [] });
         }
  
+        if (interaction.isRoleSelectMenu() && interaction.customId === 'select_clear_roles') {
+            const roleIds = interaction.values;
+            updateGuildConfig(interaction.guild.id, cfg => { cfg.clear.allowedRoles = roleIds; });
+            return interaction.update({ content: `✅ הרולים המורשים ל-!clear עודכנו: ${roleIds.map(id => `<@&${id}>`).join(', ')}`, components: [] });
+        }
+ 
         // ---------- בחירת חדרים ----------
         if (interaction.isChannelSelectMenu()) {
             if (interaction.customId === 'select_veteran_channels') {
@@ -436,6 +467,9 @@ async function handleInteraction(interaction) {
             }
             if (section === 'moderation') {
                 return interaction.update(buildModerationPanelPayload(interaction.guild.id));
+            }
+            if (section === 'clear') {
+                return interaction.update(buildClearPanelPayload(interaction.guild.id));
             }
         }
  
@@ -527,7 +561,8 @@ function buildMainPanelPayload(guildId) {
             { label: 'הגדרות תמיכה', description: 'רול הצוות שיתויג ב-!h', value: 'help', emoji: '🛠️' },
             { label: 'מערכת שינוי שם', description: 'קידומות/שם אוטומטי לפי רול', value: 'nickname', emoji: '📛' },
             { label: 'מערכת הזמנות', description: 'עד 5 חדרים מורשים לפקודות /invite', value: 'invites', emoji: '📨' },
-            { label: 'מודרציה (מיוט)', description: 'רולים וחדרים מורשים ל-mute/vmute', value: 'moderation', emoji: '🔇' }
+            { label: 'מודרציה (מיוט)', description: 'רולים וחדרים מורשים ל-mute/vmute', value: 'moderation', emoji: '🔇' },
+            { label: 'ניקוי הודעות', description: 'רולים מורשים לפקודת !clear', value: 'clear', emoji: '🧹' }
         ]);
     const menuRow = new ActionRowBuilder().addComponents(menu);
  
@@ -606,6 +641,7 @@ function buildWelcomePanelPayload(guildId) {
             .setChannelTypes(ChannelType.GuildText)
     );
     const backRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('welcome_clear_channel').setLabel('🗑️ בטל ברוכים הבאים').setStyle(ButtonStyle.Danger),
         new ButtonBuilder().setCustomId('panel_back').setLabel('⬅️ חזרה').setStyle(ButtonStyle.Secondary)
     );
  
@@ -696,6 +732,47 @@ function buildHelpPanelPayload(guildId) {
                     { type: 10, content: '## 🛠️ הגדרות תמיכה' },
                     { type: 14 },
                     { type: 10, content: `**רולי צוות נוכחיים:** ${config.roleIds.length > 0 ? config.roleIds.map(id => `<@&${id}>`).join(', ') : '❌ לא הוגדר'}\n**קולדאון נוכחי:** ${formatCooldown(config.cooldownMs)}\n**חדרים מורשים:** ${channelsText}` },
+                    { type: 14 },
+                    menuRow.toJSON(),
+                    backRow.toJSON(),
+                    { type: 14 },
+                    { type: 12, items: [{ media: { url: PANEL_BANNER_URL } }] }
+                ]
+            }
+        ]
+    };
+}
+ 
+function buildClearPanelPayload(guildId) {
+    const config = getGuildConfig(guildId).clear;
+ 
+    const menu = new StringSelectMenuBuilder()
+        .setCustomId('select_clear_action')
+        .setPlaceholder('בחר פעולה')
+        .addOptions([
+            { label: 'הגדר רולים מורשים', description: 'עד 5 רולים שיכולים להשתמש ב-!clear', value: 'set_roles', emoji: '🎭' },
+            { label: 'נקה רולים מורשים', description: 'רק Administrator יוכל להשתמש', value: 'clear_roles_list', emoji: '🗑️' }
+        ]);
+    const menuRow = new ActionRowBuilder().addComponents(menu);
+ 
+    const backRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('panel_back').setLabel('⬅️ חזרה לתפריט הראשי').setStyle(ButtonStyle.Secondary)
+    );
+ 
+    const rolesText = config.allowedRoles.length > 0
+        ? config.allowedRoles.map(id => `<@&${id}>`).join(', ')
+        : 'לא הוגדר (רק Administrator רשאי)';
+ 
+    return {
+        flags: 32768,
+        components: [
+            {
+                type: 17,
+                accent_color: 0xF1C40F,
+                components: [
+                    { type: 10, content: '## 🧹 ניקוי הודעות' },
+                    { type: 14 },
+                    { type: 10, content: `**רולים מורשים לפקודת \`!clear\`:** ${rolesText}` },
                     { type: 14 },
                     menuRow.toJSON(),
                     backRow.toJSON(),

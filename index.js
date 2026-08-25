@@ -1,8 +1,7 @@
-
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Partials } = require('discord.js');
 require('dotenv').config();
  
 // שרת HTTP זעיר - קיים רק כדי ש-Render יראה פורט פתוח ולא יעשה Timeout.
@@ -19,8 +18,10 @@ const client = new Client({
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildVoiceStates
-  ]
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessageReactions
+  ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
  
 client.commands = new Collection();

@@ -1,5 +1,6 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
 const { getGuildConfig } = require('../utils/config');
+const { addReactionRole } = require('../utils/reactionRoles');
  
 // Cooldown לפקודת !h - שומר מזהה משתמש -> חותמת זמן אחרונה
 const helpCooldowns = new Map();
@@ -21,6 +22,21 @@ module.exports = {
         if (firstWord === '!h') {
             const args = content.split(/\s+/).slice(1);
             return handleHelpRequest(message, args);
+        }
+ 
+        // ---------- !clear - מחיקת הודעות בכמות ----------
+        if (firstWord === '!clear') {
+            const args = content.split(/\s+/).slice(1);
+            return handleClearRequest(message, args);
+        }
+ 
+        // ---------- !rr - רול-ריאקשן (כמו קארל-בוט) ----------
+        if (firstWord === '!rr') {
+            const args = content.split(/\s+/).slice(1);
+            if (args[0] === 'add') {
+                return handleReactionRoleAdd(message, args.slice(1));
+            }
+            return;
         }
     },
 };
@@ -45,6 +61,7 @@ async function handleVeteranCheck(message) {
     const nowInSeconds = Math.floor(Date.now() / 1000);
     const requiredSeconds = veteranConfig.requiredDays * 24 * 60 * 60;
     const isEligible = (nowInSeconds - joinedTimestamp) >= requiredSeconds;
+    const eligibleTimestamp = joinedTimestamp + requiredSeconds;
  
     const BANNER_URL = veteranConfig.bannerUrl;
  
@@ -52,7 +69,7 @@ async function handleVeteranCheck(message) {
     let statusColor = 0x0099FF;
  
     if (isEligible) {
-        eligibilityText = `## האם אתה זכאי לקבלת וטרן?\n**אתה זכאי לרול וטרן!**\n<@&${VETERAN_ROLE_ID}>!`;
+        eligibilityText = `## האם אתה זכאי לקבלת וטרן?\n**אתה זכאי לרול וטרן!**\n<@&${VETERAN_ROLE_ID}>!\n**זכאי מאז:** <t:${eligibleTimestamp}:R>`;
  
         if (!member.roles.cache.has(VETERAN_ROLE_ID)) {
             try {
@@ -65,7 +82,7 @@ async function handleVeteranCheck(message) {
         const daysText = veteranConfig.requiredDays % 365 === 0
             ? `${veteranConfig.requiredDays / 365} שנה/ים`
             : `${veteranConfig.requiredDays} ימים`;
-        eligibilityText = `## האם אתה זכאי לקבלת וטרן?\n**אתה לא זכאי עדיין לרול וטרן**\n**אתה צריך להיות בשרת מעל ל-${daysText}.**`;
+        eligibilityText = `## האם אתה זכאי לקבלת וטרן?\n**אתה לא זכאי עדיין לרול וטרן**\n**אתה צריך להיות בשרת מעל ל-${daysText}.**\n**תהיה זכאי:** <t:${eligibleTimestamp}:R> (<t:${eligibleTimestamp}:F>)`;
     }
  
     await message.reply({
@@ -147,4 +164,95 @@ async function handleHelpRequest(message, args) {
     } catch (error) {
         console.error("❌ Error", error);
     }
+}
+ 
+async function handleClearRequest(message, args) {
+    const clearConfig = getGuildConfig(message.guild.id).clear;
+    const isAdmin = message.member.permissions.has(PermissionFlagsBits.Administrator);
+    const hasAllowedRole = clearConfig.allowedRoles.some(roleId => message.member.roles.cache.has(roleId));
+ 
+    if (!isAdmin && !hasAllowedRole) {
+        return; // בלי הרשאה - מתעלמים בשקט, בלי לספאם את החדר
+    }
+ 
+    const amount = parseInt(args[0], 10);
+    if (isNaN(amount) || amount <= 0 || amount > 100) {
+        const warning = await message.reply('❌ יש לציין כמות תקינה בין 1 ל-100, לדוגמה: `!clear 20`');
+        return setTimeout(() => warning.delete().catch(() => {}), 5000);
+    }
+ 
+    try {
+        // true = מתעלם אוטומטית מהודעות ישנות מ-14 יום (מגבלת דיסקורד למחיקה מרוכזת)
+        const deleted = await message.channel.bulkDelete(amount, true);
+        const confirm = await message.channel.send(`🗑️ נמחקו ${deleted.size} הודעות.`);
+        setTimeout(() => confirm.delete().catch(() => {}), 5000);
+    } catch (err) {
+        console.error('❌ שגיאה במחיקת הודעות:', err);
+        message.channel.send('❌ קרתה שגיאה במחיקת ההודעות.').then(msg =>
+            setTimeout(() => msg.delete().catch(() => {}), 5000)
+        );
+    }
+}
+ 
+async function handleReactionRoleAdd(message, args) {
+    if (!message.member.permissions.has(PermissionFlagsBits.Administrator)) {
+        return message.reply('⛔ רק אדמין יכול להגדיר רול-ריאקשן.');
+    }
+ 
+    const usage = '!rr add [channel] <msg_id> <emoji> <role>';
+ 
+    function usageError(paramName) {
+        const index = usage.indexOf(`<${paramName}>`) + 1;
+        const pointer = ' '.repeat(index) + '^'.repeat(paramName.length);
+        return `\`\`\`\n${usage}\n${pointer}\n${paramName} is a required argument that is missing.\n\`\`\``;
+    }
+ 
+    const rest = [...args];
+    let targetChannel = message.channel;
+ 
+    // בדיקה אם הפרמטר הראשון הוא חדר (תיוג או ID) - אם כן, זו אופציה, לא חובה
+    if (rest.length > 0) {
+        const channelMatch = rest[0].match(/^<#(\d+)>$/) || rest[0].match(/^(\d{17,20})$/);
+        if (channelMatch) {
+            const potentialChannel = message.guild.channels.cache.get(channelMatch[1]);
+            if (potentialChannel) {
+                targetChannel = potentialChannel;
+                rest.shift();
+            }
+        }
+    }
+ 
+    const msgId = rest[0];
+    if (!msgId) return message.reply(usageError('msg_id'));
+ 
+    const emojiArg = rest[1];
+    if (!emojiArg) return message.reply(usageError('emoji'));
+ 
+    const roleArg = rest[2];
+    if (!roleArg) return message.reply(usageError('role'));
+ 
+    const targetMessage = await targetChannel.messages.fetch(msgId).catch(() => null);
+    if (!targetMessage) {
+        return message.reply(`❌ לא מצאתי הודעה עם ה-ID \`${msgId}\` בחדר ${targetChannel}.`);
+    }
+ 
+    const roleIdMatch = roleArg.match(/^<@&(\d+)>$/) || roleArg.match(/^(\d{17,20})$/);
+    const role = roleIdMatch ? message.guild.roles.cache.get(roleIdMatch[1]) : null;
+    if (!role) {
+        return message.reply('❌ לא זיהיתי את הרול. יש לתייג אותו (@רול) או לתת את ה-ID שלו.');
+    }
+ 
+    // זיהוי מזהה האימוג'י - מותאם אישית (ID) או יוניקוד רגיל (התו עצמו)
+    const customEmojiMatch = emojiArg.match(/^<a?:\w+:(\d+)>$/);
+    const emojiKey = customEmojiMatch ? customEmojiMatch[1] : emojiArg;
+ 
+    try {
+        await targetMessage.react(emojiArg);
+    } catch (err) {
+        console.error('❌ שגיאה בהוספת ריאקשן להודעה:', err);
+        return message.reply('❌ לא הצלחתי להוסיף את הריאקשן הזה להודעה - יש לוודא שזה אימוג׳י תקין שהבוט מכיר.');
+    }
+ 
+    addReactionRole(targetMessage.id, message.guild.id, targetChannel.id, emojiKey, role.id);
+    await message.reply(`✅ הוגדר! מי שיוסיף ${emojiArg} על ${targetMessage.url} יקבל את הרול ${role}.`);
 }

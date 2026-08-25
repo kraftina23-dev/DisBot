@@ -4,14 +4,18 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 // אז צריך לעדכן את הרשימה כאן ידנית בכל פעם שמוסיפים/משנים פקודת "!" חדשה.
 const PREFIX_COMMANDS = [
     { name: '!vt', description: 'בדיקת וותק בשרת וקבלת רול וטרן במידה ועומדים בדרישה' },
-    { name: '!h', description: 'קריאה לעזרה/תמיכה - מתייג את הצוות המוגדר' }
+    { name: '!h', description: 'קריאה לעזרה/תמיכה - מתייג את הצוות המוגדר' },
+    { name: '!clear <כמות>', description: 'מחיקת מספר הודעות בחדר (עד 100). דורש הרשאה מתאימה.' },
+    { name: '!rr add [חדר] <msg_id> <אימוג׳י> <רול>', description: 'הגדרת רול-ריאקשן על הודעה קיימת. רק אדמין.' }
 ];
  
 // מערכות פנימיות בבוט שרצות ברקע (לא פקודות שמריצים ישירות) - גם אלו מתעדכנות ידנית.
 const BOT_SYSTEMS = [
     { name: 'שינוי שם אוטומטי', description: 'קידומת/שם אוטומטי לפי הרול הגבוה ביותר שיש למשתמש. ניתן להגדיר דרך `/panel`.' },
     { name: 'מעקב הזמנות', description: 'עד 5 חדרים מורשים לפקודות `/invite`. ניתן להגדיר דרך `/panel`.' },
-    { name: 'מודרציה (מיוט)', description: 'רולי מיוט/השתקת קול, רולים וחדרים מורשים ל-mute/vmute. רול המיוט עצמו מוקם דרך `/setup mute` ו-`/setup vmute`, שאר ההגדרות דרך `/panel`.' }
+    { name: 'מודרציה (מיוט)', description: 'רולי מיוט/השתקת קול, רולים וחדרים מורשים ל-mute/vmute. רול המיוט עצמו מוקם דרך `/setup mute` ו-`/setup vmute`, שאר ההגדרות דרך `/panel`.' },
+    { name: 'ניקוי הודעות', description: 'רולים מורשים לפקודת `!clear`. ניתן להגדיר דרך `/panel`.' },
+    { name: 'רול-ריאקשן', description: 'קבלת רול בלחיצה על אימוג׳י תחת הודעה. מוגדר דרך `!rr add`.' }
 ];
  
 const SUBCOMMAND_TYPE = 1; // ApplicationCommandOptionType.Subcommand
