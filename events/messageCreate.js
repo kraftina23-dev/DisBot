@@ -250,9 +250,15 @@ async function handleReactionRoleAdd(message, args) {
         await targetMessage.react(emojiArg);
     } catch (err) {
         console.error('❌ שגיאה בהוספת ריאקשן להודעה:', err);
+ 
+        if (err.code === 10014) {
+            return message.reply('❌ **אימוג׳י לא נמצא (Unknown Emoji).** אם זה אימוג׳י מותאם אישית משרת אחר, יש לוודא: (1) הבוט חבר גם באותו שרת, וגם (2) יש לו הרשאת **"Use External Emojis"** בחדר הזה.');
+        }
+ 
         return message.reply('❌ לא הצלחתי להוסיף את הריאקשן הזה להודעה - יש לוודא שזה אימוג׳י תקין שהבוט מכיר.');
     }
  
     addReactionRole(targetMessage.id, message.guild.id, targetChannel.id, emojiKey, role.id);
     await message.reply(`✅ הוגדר! מי שיוסיף ${emojiArg} על ${targetMessage.url} יקבל את הרול ${role}.`);
 }
+ 
