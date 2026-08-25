@@ -255,7 +255,7 @@ async function handleReactionRoleAdd(message, args) {
             return message.reply('❌ **אימוג׳י לא נמצא (Unknown Emoji).** אם זה אימוג׳י מותאם אישית משרת אחר, יש לוודא: (1) הבוט חבר גם באותו שרת, וגם (2) יש לו הרשאת **"Use External Emojis"** בחדר הזה.');
         }
  
-        return message.reply('❌ לא הצלחתי להוסיף את הריאקשן הזה להודעה - יש לוודא שזה אימוג׳י תקין שהבוט מכיר.');
+        return message.reply('❌ לא הצלחתי להוסיף את הריאקשן הזה להודעה - יש לוודא שזה אימוג׳י תקין שהבוט מכיר צריך שיהיה בשרת הזה או בדיסקורד ולא משרת אחר.');
     }
  
     addReactionRole(targetMessage.id, message.guild.id, targetChannel.id, emojiKey, role.id);
