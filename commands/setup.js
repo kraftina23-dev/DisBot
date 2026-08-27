@@ -9,6 +9,7 @@ const {
 } = require('discord.js');
 const { getGuildConfig, updateGuildConfig } = require('../utils/config');
 const { setupTextMuteRole, setupVoiceMuteRole } = require('../utils/muteRoleSetup');
+const { saveSetup } = require('../utils/tempVoiceStore');
  
 module.exports = {
     data: new SlashCommandBuilder()
@@ -37,6 +38,10 @@ module.exports = {
         .addSubcommand(sub =>
             sub.setName('vmute')
                 .setDescription('יצירת/עדכון רול השתקת הקול, וחסימתו מלדבר בכל חדרי הקול')
+        )
+        .addSubcommand(sub =>
+            sub.setName('tempvoice')
+                .setDescription('הקמת מערכת חדרי קול זמניים (TempVoice) - קטגוריה, חדר יצירה, וחדר בקרה')
         ),
  
     async execute(interaction) {
@@ -44,6 +49,7 @@ module.exports = {
         if (sub === 'verify') return handleSetupVerify(interaction);
         if (sub === 'mute') return handleSetupMute(interaction);
         if (sub === 'vmute') return handleSetupVmute(interaction);
+        if (sub === 'tempvoice') return handleSetupTempVoice(interaction);
     }
 };
  
@@ -111,5 +117,91 @@ async function handleSetupVmute(interaction) {
         console.error('❌ שגיאה ב-/setup vmute:', err);
         await interaction.editReply('❌ קרתה שגיאה בהקמת רול השתקת הקול. יש לוודא שיש לבוט הרשאת Manage Roles ו-Manage Channels.');
     }
+}
+ 
+async function handleSetupTempVoice(interaction) {
+    await interaction.deferReply({ ephemeral: true });
+ 
+    const guild = interaction.guild;
+    const everyone = guild.roles.everyone;
+ 
+    try {
+        const category = await guild.channels.create({
+            name: 'Temp Voice',
+            type: ChannelType.GuildCategory
+        });
+ 
+        const createChannel = await guild.channels.create({
+            name: '🎙️・Create Voice',
+            type: ChannelType.GuildVoice,
+            parent: category.id,
+            permissionOverwrites: [
+                { id: everyone.id, deny: [PermissionFlagsBits.SendMessages] }
+            ]
+        });
+ 
+        const waitingChannel = await guild.channels.create({
+            name: '⏳・Waiting Room',
+            type: ChannelType.GuildVoice,
+            parent: category.id,
+            permissionOverwrites: [
+                { id: everyone.id, deny: [PermissionFlagsBits.SendMessages] }
+            ]
+        });
+ 
+        const controllerChannel = await guild.channels.create({
+            name: '📋・Voice Controller',
+            type: ChannelType.GuildText,
+            parent: category.id,
+            permissionOverwrites: [
+                { id: everyone.id, allow: [PermissionFlagsBits.ViewChannel], deny: [PermissionFlagsBits.SendMessages] }
+            ]
+        });
+ 
+        saveSetup(guild.id, {
+            categoryId: category.id,
+            createChannelId: createChannel.id,
+            controllerChannelId: controllerChannel.id,
+            waitingChannelId: waitingChannel.id
+        });
+ 
+        await sendTempVoiceControllerMessage(controllerChannel);
+ 
+        await interaction.editReply(`✅ מערכת TempVoice הוקמה!\nקטגוריה: **${category.name}**\nחדר יצירה: ${createChannel}\nחדר בקרה: ${controllerChannel}\nחדר המתנה: ${waitingChannel}`);
+    } catch (err) {
+        console.error('❌ שגיאה בהקמת TempVoice:', err);
+        await interaction.editReply('❌ קרתה שגיאה בהקמת המערכת. יש לוודא שיש לבוט הרשאת Manage Channels.');
+    }
+}
+ 
+async function sendTempVoiceControllerMessage(channel) {
+    const embed = new EmbedBuilder()
+        .setTitle('TempVoice Interface')
+        .setDescription('הממשק הזה משמש לניהול חדר הקול הזמני שלך.\nיש להיכנס קודם לחדר שלך, ואז ללחוץ על הכפתורים למטה.\nרק הבעלים של החדר יכול להשתמש בכפתורים (חוץ מ-CLAIM, שפתוח לכולם).')
+        .setColor(0x2B2D31);
+ 
+    const row1 = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('tempvoice_name').setLabel('שם').setEmoji('✏️').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_limit').setLabel('הגבלה').setEmoji('👥').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_privacy').setLabel('פרטיות').setEmoji('🔒').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_waitingroom').setLabel('חדר המתנה').setEmoji('⏰').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_chat').setLabel('צ׳אט').setEmoji('💬').setStyle(ButtonStyle.Secondary)
+    );
+    const row2 = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('tempvoice_trust').setLabel('אמון').setEmoji('🤝').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_untrust').setLabel('הסר אמון').setEmoji('🚷').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_invite').setLabel('הזמנה').setEmoji('📨').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_kick').setLabel('ניתוק').setEmoji('📵').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_region').setLabel('אזור').setEmoji('🌍').setStyle(ButtonStyle.Secondary)
+    );
+    const row3 = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('tempvoice_block').setLabel('חסימה').setEmoji('🚫').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_unblock').setLabel('הסר חסימה').setEmoji('♻️').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_claim').setLabel('תפיסה').setEmoji('👑').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_transfer').setLabel('העברה').setEmoji('🔁').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('tempvoice_delete').setLabel('מחיקה').setEmoji('🗑️').setStyle(ButtonStyle.Danger)
+    );
+ 
+    await channel.send({ embeds: [embed], components: [row1, row2, row3] });
 }
  

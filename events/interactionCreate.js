@@ -44,6 +44,12 @@ module.exports = {
 };
  
 async function handleInteraction(interaction) {
+        // ---------- מערכת TempVoice - הרשאות משלה (בעלים בלבד), לפני כל בדיקה אחרת ----------
+        if (interaction.customId && (interaction.customId.startsWith('tempvoice_') || interaction.customId.startsWith('modal_tempvoice_') || interaction.customId.startsWith('select_tempvoice_'))) {
+            const handled = await require('../utils/tempVoiceHandlers').handleTempVoiceInteraction(interaction);
+            if (handled) return;
+        }
+ 
         // ---------- הרצת פקודות Slash ----------
         if (interaction.isChatInputCommand()) {
             const command = interaction.client.commands.get(interaction.commandName);

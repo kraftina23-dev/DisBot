@@ -15,7 +15,8 @@ const BOT_SYSTEMS = [
     { name: 'מעקב הזמנות', description: 'עד 5 חדרים מורשים לפקודות `/invite`. ניתן להגדיר דרך `/panel`.' },
     { name: 'מודרציה (מיוט)', description: 'רולי מיוט/השתקת קול, רולים וחדרים מורשים ל-mute/vmute. רול המיוט עצמו מוקם דרך `/setup mute` ו-`/setup vmute`, שאר ההגדרות דרך `/panel`.' },
     { name: 'ניקוי הודעות', description: 'רולים מורשים לפקודת `!clear`. ניתן להגדיר דרך `/panel`.' },
-    { name: 'רול-ריאקשן', description: 'קבלת רול בלחיצה על אימוג׳י תחת הודעה. מוגדר דרך `!rr add`.' }
+    { name: 'רול-ריאקשן', description: 'קבלת רול בלחיצה על אימוג׳י תחת הודעה. מוגדר דרך `!rr add`.' },
+    { name: 'TempVoice (חדרי קול זמניים)', description: 'קטגוריה + חדר יצירה + פאנל שליטה מלא (15 כפתורים). מוקם דרך `/setup tempvoice`.' }
 ];
  
 const SUBCOMMAND_TYPE = 1; // ApplicationCommandOptionType.Subcommand
