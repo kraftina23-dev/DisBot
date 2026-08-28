@@ -136,16 +136,11 @@ async function handleSetupTempVoice(interaction) {
             type: ChannelType.GuildVoice,
             parent: category.id,
             permissionOverwrites: [
-                { id: everyone.id, deny: [PermissionFlagsBits.SendMessages] }
-            ]
-        });
- 
-        const waitingChannel = await guild.channels.create({
-            name: '⏳・Waiting Room',
-            type: ChannelType.GuildVoice,
-            parent: category.id,
-            permissionOverwrites: [
-                { id: everyone.id, deny: [PermissionFlagsBits.SendMessages] }
+                {
+                    id: everyone.id,
+                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.Connect],
+                    deny: [PermissionFlagsBits.SendMessages]
+                }
             ]
         });
  
@@ -154,20 +149,23 @@ async function handleSetupTempVoice(interaction) {
             type: ChannelType.GuildText,
             parent: category.id,
             permissionOverwrites: [
-                { id: everyone.id, allow: [PermissionFlagsBits.ViewChannel], deny: [PermissionFlagsBits.SendMessages] }
+                {
+                    id: everyone.id,
+                    allow: [PermissionFlagsBits.ViewChannel],
+                    deny: [PermissionFlagsBits.SendMessages]
+                }
             ]
         });
  
         saveSetup(guild.id, {
             categoryId: category.id,
             createChannelId: createChannel.id,
-            controllerChannelId: controllerChannel.id,
-            waitingChannelId: waitingChannel.id
+            controllerChannelId: controllerChannel.id
         });
  
         await sendTempVoiceControllerMessage(controllerChannel);
  
-        await interaction.editReply(`✅ מערכת TempVoice הוקמה!\nקטגוריה: **${category.name}**\nחדר יצירה: ${createChannel}\nחדר בקרה: ${controllerChannel}\nחדר המתנה: ${waitingChannel}`);
+        await interaction.editReply(`✅ מערכת TempVoice הוקמה!\nקטגוריה: **${category.name}**\nחדר יצירה: ${createChannel}\nחדר בקרה: ${controllerChannel}`);
     } catch (err) {
         console.error('❌ שגיאה בהקמת TempVoice:', err);
         await interaction.editReply('❌ קרתה שגיאה בהקמת המערכת. יש לוודא שיש לבוט הרשאת Manage Channels.');
@@ -184,22 +182,19 @@ async function sendTempVoiceControllerMessage(channel) {
         new ButtonBuilder().setCustomId('tempvoice_name').setLabel('שם').setEmoji('✏️').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('tempvoice_limit').setLabel('הגבלה').setEmoji('👥').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('tempvoice_privacy').setLabel('פרטיות').setEmoji('🔒').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('tempvoice_waitingroom').setLabel('חדר המתנה').setEmoji('⏰').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('tempvoice_chat').setLabel('צ׳אט').setEmoji('💬').setStyle(ButtonStyle.Secondary)
     );
     const row2 = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('tempvoice_trust').setLabel('אמון').setEmoji('🤝').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('tempvoice_untrust').setLabel('הסר אמון').setEmoji('🚷').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('tempvoice_invite').setLabel('הזמנה').setEmoji('📨').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('tempvoice_kick').setLabel('ניתוק').setEmoji('📵').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('tempvoice_region').setLabel('אזור').setEmoji('🌍').setStyle(ButtonStyle.Secondary)
+        new ButtonBuilder().setCustomId('tempvoice_kick').setLabel('ניתוק').setEmoji('📵').setStyle(ButtonStyle.Secondary)
     );
     const row3 = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('tempvoice_block').setLabel('חסימה').setEmoji('🚫').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('tempvoice_unblock').setLabel('הסר חסימה').setEmoji('♻️').setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('tempvoice_claim').setLabel('תפיסה').setEmoji('👑').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('tempvoice_transfer').setLabel('העברה').setEmoji('🔁').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('tempvoice_delete').setLabel('מחיקה').setEmoji('🗑️').setStyle(ButtonStyle.Danger)
+        new ButtonBuilder().setCustomId('tempvoice_transfer').setLabel('העברה').setEmoji('🔁').setStyle(ButtonStyle.Secondary)
     );
  
     await channel.send({ embeds: [embed], components: [row1, row2, row3] });
